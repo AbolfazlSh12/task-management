@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import authRoutes from "./routes/auth.js";
@@ -6,6 +7,13 @@ import taskRoutes from "./routes/tasks.js";
 
 const app = express();
 app.use(express.json());
+
+// Configure CORS to allow requests from your React app
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Replace with the React app's origin
+  })
+);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -37,7 +45,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
 // Start server
-const PORT = 3000;
+const PORT = 3002;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT} - API Docs at /api-docs`)
 );

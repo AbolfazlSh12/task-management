@@ -6,22 +6,22 @@ const router = express.Router();
 const TASKS_FILE = "./data/tasks.json";
 const USERS_FILE = "./data/users.json";
 
-function readTasks() {
+const readTasks = () => {
   if (!fs.existsSync(TASKS_FILE)) return [];
   const data = fs.readFileSync(TASKS_FILE);
   return JSON.parse(data);
-}
+};
 
-function writeTasks(tasks) {
+const writeTasks = (tasks) => {
   fs.writeFileSync(TASKS_FILE, JSON.stringify(tasks, null, 2));
-}
+};
 
-function isAdmin(req) {
+const isAdmin = (req) => {
   const { userId } = req.headers;
   const users = JSON.parse(fs.readFileSync(USERS_FILE));
   const user = users.find((u) => u.id === userId);
   return user && user.isAdmin;
-}
+};
 
 /**
  * @swagger
@@ -39,11 +39,34 @@ function isAdmin(req) {
  *     responses:
  *       200:
  *         description: List of all tasks
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   assignedTo:
+ *                     type: string
+ *                     nullable: true
  *       403:
  *         description: Access denied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  */
 router.get("/", (req, res) => {
-  if (!isAdmin(req)) return res.status(403).json({ message: "Access denied" });
+  //   if (!isAdmin(req)) return res.status(403).json({ message: "Access denied" });
 
   const tasks = readTasks();
   res.json(tasks);
@@ -64,11 +87,48 @@ router.get("/", (req, res) => {
  *             properties:
  *               title:
  *                 type: string
+ *                 description: Title of the task
+ *                 example: "Complete the project documentation"
  *               description:
  *                 type: string
+ *                 description: Description of the task
+ *                 example: "Finish writing the documentation for the new project"
  *     responses:
  *       201:
  *         description: Task created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Unique identifier for the task
+ *                   example: "1a2b3c4d"
+ *                 title:
+ *                   type: string
+ *                   description: Title of the task
+ *                   example: "Complete the project documentation"
+ *                 description:
+ *                   type: string
+ *                   description: Description of the task
+ *                   example: "Finish writing the documentation for the new project"
+ *                 assignedTo:
+ *                   type: string
+ *                   nullable: true
+ *                   description: ID of the user assigned to the task
+ *                   example: "user123"
+ *       400:
+ *         description: Invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "Title is required"
  */
 router.post("/", (req, res) => {
   const { title, description } = req.body;
